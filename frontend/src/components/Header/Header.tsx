@@ -1,3 +1,4 @@
+// components/Header/Header.tsx
 import React from 'react';
 import { MessageSquare, RotateCcw, Database } from 'lucide-react';
 import './Header.scss';
@@ -13,6 +14,13 @@ export const Header: React.FC<HeaderProps> = ({
   onResetSession,
   onPersistSession
 }) => {
+  const formatSessionId = (id: string) => {
+    if (id.length > 20) {
+      return `${id.substring(0, 8)}...${id.substring(id.length - 8)}`;
+    }
+    return id;
+  };
+
   return (
     <header className="chat-header">
       <div className="header-content">
@@ -36,7 +44,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
       <div className="session-info">
-        Session: {sessionId}
+        Session: {formatSessionId(sessionId)}
       </div>
     </header>
   );

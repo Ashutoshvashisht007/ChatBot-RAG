@@ -16,7 +16,7 @@
       margin: 0;
       font-size: 1.5rem;
       font-weight: 600;
-      color: #2d3748;
+      color: black;
       display: flex;
       align-items: center;
       gap: 0.5rem;
@@ -34,7 +34,7 @@
 
   .session-info {
     font-size: 0.75rem;
-    color: #718096;
+    color: blue;
     text-align: center;
     margin-top: 0.5rem;
   }
@@ -93,11 +93,11 @@
 
 @media (prefers-color-scheme: dark) {
   .chat-header {
-    background: rgba(26, 32, 44, 0.95);
+    background: white;
     border-bottom-color: rgba(255, 255, 255, 0.1);
 
     .header-content h1 {
-      color: #f7fafc;
+      color: black;
     }
 
     .reset-btn, .persist-btn {

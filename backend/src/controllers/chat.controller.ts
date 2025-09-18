@@ -39,13 +39,14 @@ export async function clearHandler(req: Request, res: Response) {
 
 /** POST /api/persist/:sessionId  -> persist to Postgres */
 export async function persistHandler(req: Request, res: Response) {
+
   try {
     const sessionId = req.params.sessionId;
-    const history = await getHistory(sessionId);
+    const history = await getHistory(sessionId); // Redis se history fetch
     if (!history || history.length === 0) {
       return res.status(400).json({ ok: false, error: 'no history to persist' });
     }
-    const row = await persistTranscript(sessionId, history);
+    const row = await persistTranscript(sessionId, history); // DB me save
     res.json({ ok: true, persisted: row });
   } catch (err: any) {
     console.error('persist error', err);

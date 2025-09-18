@@ -10,19 +10,29 @@ export const useChat = (sessionId: string) => {
   const [isStreaming, setIsStreaming] = useState(false);
 
   useEffect(() => {
-    loadHistory();
+    if (sessionId) {
+      loadHistory();
+    }
   }, [sessionId]);
 
   const loadHistory = async () => {
     try {
+      if (!sessionId) return;
+      
       const response = await fetch(`${API_BASE}/history/${sessionId}`);
       if (response.ok) {
         const data: HistoryResponse = await response.json();
-        if (data.success && data.history) {
-          setMessages(data.history.map(msg => ({
-            ...msg,
-            timestamp: new Date(msg.timestamp)
-          })));
+        
+        if (data.history && Array.isArray(data.history)) {
+          // Convert backend format to frontend format
+          const convertedMessages: Message[] = data.history.map((msg, index) => ({
+            id: `${msg.role}_${msg.ts}_${index}`, // Create unique ID
+            text: msg.text,
+            sender: msg.role === 'assistant' ? 'bot' : (msg.role as 'user'), // Convert 'assistant' to 'bot'
+            timestamp: new Date(msg.ts) // Convert timestamp from number to Date
+          }));
+          
+          setMessages(convertedMessages);
         }
       }
     } catch (error) {
@@ -81,7 +91,7 @@ export const useChat = (sessionId: string) => {
       if (response.ok) {
         const data: ChatResponse = await response.json();
 
-        if (data.answer) {  // 'answer' field check karo
+        if (data.answer) {
           simulateTyping(data.answer, () => {
             const botMessage: Message = {
               id: `bot_${Date.now()}`,
@@ -134,16 +144,30 @@ export const useChat = (sessionId: string) => {
       });
 
       if (response.ok) {
-        const successMessage: Message = {
-          id: `system_${Date.now()}`,
-          text: 'Session has been saved to database successfully!',
-          sender: 'bot',
-          timestamp: new Date()
-        };
-        setMessages(prev => [...prev, successMessage]);
+        const result = await response.json();
+        if (result.ok) {
+          const successMessage: Message = {
+            id: `system_${Date.now()}`,
+            text: 'Session has been saved to database successfully!',
+            sender: 'bot',
+            timestamp: new Date()
+          };
+          setMessages(prev => [...prev, successMessage]);
+        } else {
+          throw new Error(result.error || 'Failed to persist session');
+        }
+      } else {
+        throw new Error(`HTTP ${response.status}`);
       }
     } catch (error) {
       console.error('Failed to persist session:', error);
+      const errorMessage: Message = {
+        id: `error_${Date.now()}`,
+        text: 'Failed to save session. Please try again.',
+        sender: 'bot',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMessage]);
     }
   };
 
